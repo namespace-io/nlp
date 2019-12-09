@@ -29,14 +29,14 @@ class Encoder(nn.Module):
 class Attention(nn.Module):
     def __init__(self, enc_hid_dim, dec_hid_dim):
         super().__init__()
-        self.attn = nn.Liner((enc_hid_dim * 2) + dec_hid_dim, dec_hid_dim)
+        self.attn = nn.Linear((enc_hid_dim * 2) + dec_hid_dim, dec_hid_dim)
         self.v = nn.Parameter(torch.rand(dec_hid_dim))
 
     def forward(self, hidden, encoder_outputs):
         #hidden = [batch_size, dec_hid_dim]
         #encoder_outputs = [src_len, batch_size, enc_hid_dim * 2]
 
-        batch_size = encoder_ouputs.shape[1]
+        batch_size = encoder_outputs.shape[1]
         src_len = encoder_outputs.shape[0]
         hidden = hidden.unsqueeze(1).repeat(1, src_len, 1)
         #hidden = [batch_size, src_len, dec_hid_dim]
@@ -79,15 +79,16 @@ class Decoder(nn.Module):
         #embedded = [1, batch_size, emb_dim]
         a = self.attention(hidden, encoder_outputs)
         #a = [batch_size, src_len]
-
-        a.unsqueeze(1)
+       
+        a = a.unsqueeze(1)
         #a = [batch_size, 1, src_len]
-
+       
         encoder_outputs = encoder_outputs.permute(1, 0, 2)
         weighted = torch.bmm(a, encoder_outputs)
-        weighted.permute(1, 0, 2)
-        #weighted = [batch_size, 1, enc_hid_dim * 2]
-
+       
+        weighted = weighted.permute(1, 0, 2)
+        #weighted = [1, batch_size, enc_hid_dim * 2]
+        
         rnn_input = torch.cat((embedded, weighted), dim = 2)
         output, hidden = self.rnn(rnn_input, hidden.unsqueeze(0))
         #output = [1, batch size, dec hid dim]

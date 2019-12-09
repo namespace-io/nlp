@@ -1,0 +1,5 @@
+/.data/*
+*.pt
+/seq2seq/__pycache__/
+
+
